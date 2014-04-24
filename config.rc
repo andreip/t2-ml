@@ -1,14 +1,14 @@
 # game given constants
 [game]
-x=100
-y=100
+x=500
+y=500
 pray_speed=3
-pray_perception=15
-pray_collision=5
-pred_nr=5
+pray_perception=35
+pray_collision=15
+pred_nr=3
 pred_speed=5
-pred_perception=10
-pred_collision=5
+pred_perception=30
+pred_collision=15
 traps_nr=5
 traps_collision=5
 
