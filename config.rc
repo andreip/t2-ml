@@ -1,0 +1,17 @@
+# game given constants
+[game]
+x=100
+y=100
+pray_speed=3
+pray_perception=15
+pray_collision=5
+pred_nr=5
+pred_speed=5
+pred_perception=10
+pred_collision=5
+traps_nr=5
+traps_collision=5
+
+# algorithm related numbers.
+[algo]
+k=10
