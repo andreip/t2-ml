@@ -9,8 +9,8 @@ pred_nr=3
 pred_speed=5
 pred_perception=30
 pred_collision=15
-traps_nr=5
-traps_collision=5
+trap_nr=3
+trap_collision=30
 
 # algorithm related numbers.
 [algo]
