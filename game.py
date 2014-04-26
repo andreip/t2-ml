@@ -17,8 +17,10 @@ def get_config(config_file='config.rc'):
 
 def objects_collide(pos1, rad1, pos2, rad2):
     '''Detects if two objects touch another.'''
-    # TODO
-    return False
+    (x1, y1), (x2, y2) = pos1, pos2
+    actual_dist = abs(x1 - x2)**2 + abs(y1 - y2)**2
+    no_collision_dist = rad1 + rad2
+    return actual_dist < no_collision_dist
 
 def generate_without_collision(collision_list, collision_radius):
     '''Generate a new coordinate so that it does not collide with any

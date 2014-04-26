@@ -1,7 +1,7 @@
 # game given constants
 [game]
-x=500
-y=500
+x=700
+y=700
 pray_speed=3
 pray_perception=35
 pray_collision=15
