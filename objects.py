@@ -57,7 +57,9 @@ class Pray(BaseObject):
         '''Execute a move, but check for corners too.'''
         (x,y) = self.get_next_position()
         # In case we would leave the board.
-        if x < 0 or x > self.gameX or y < 0 or y > self.gameY:
+        eps = self.collision_radius
+        if (x + eps < 0 or x + eps > self.gameX or
+            y + eps < 0 or y + eps > self.gameY):
             self.set_new_direction()
             self.move()
         else:
