@@ -1,6 +1,8 @@
 import pygame, math, sys
 from pygame.locals import *
 
+from objects import BaseObject, Pray, Predator, Trap
+
 BLACK=(0,0,0)
 WHITE=(255,255,255)
 RED=(255,0,0)
@@ -17,11 +19,12 @@ PRED_COLOR=BLUE
 TRAP_COLOR=GRAY
 
 class Draw:
-    def __init__(self, config):
+    def __init__(self, config, instances):
         self.config = config
         resolution = (config.getint('game','x'),
                       config.getint('game','y'))
         self.screen = pygame.display.set_mode(resolution, DOUBLEBUF)
+        self.instances = instances
         self.run()
 
     def run(self):
@@ -44,50 +47,33 @@ class Draw:
                     running = False
                     break
             self.screen.fill(BLACK)
-            self.draw_once()
+            for instance in self.instances:
+                self.draw_instance(instance)
+                # Move to new position.
+                instance.move()
+            BaseObject.resolve_collisions(self.instances)
             pygame.display.flip()
 
         pygame.quit()
 
-    def draw_once(self):
-        '''Draw objects like pray, predators, traps on the map.'''
-        # Draw pray
-        pray_percept_radius = self.config.getint('game','pray_perception')
-        pray_collide_radius = self.config.getint('game','pray_collision')
-        pray_coord = self.config.get('game', 'pray_coord')
-        self.draw_creature(self.get_coord(pray_coord),
-                          [PERCEPT_COLOR, COLLIDE_COLOR, PRAY_COLOR],
-                          [pray_percept_radius, pray_collide_radius,
-                           pray_collide_radius / 2])
-        # Draw predators
-        pred_percept_radius = self.config.getint('game','pred_perception')
-        pred_collide_radius = self.config.getint('game','pred_collision')
-        for i in range(self.config.getint('game','pred_nr')):
-            pred_coord = self.config.get('game','pred_coords')[i]
-            self.draw_creature(self.get_coord(pred_coord),
-                              [PERCEPT_COLOR, COLLIDE_COLOR, PRED_COLOR],
-                              [pred_percept_radius, pred_collide_radius,
-                               pred_collide_radius / 2])
-        # Draw traps
-        trap_collide_radius = self.config.getint('game','trap_collision')
-        for i in range(self.config.getint('game','trap_nr')):
-            trap_coord = self.config.get('game','trap_coords')[i]
-            self.draw_trap(self.get_coord(trap_coord),
-                          [COLLIDE_COLOR, TRAP_COLOR],
-                          [trap_collide_radius, trap_collide_radius / 2])
-
-    def draw_creature(self, coords, colors, dimensions):
+    def draw_instance(self, instance):
         '''Draw a creature: two outer shells: perception, collision,
         (draw perception first as perception should be > collision)
         then the creature.'''
-        pygame.draw.circle(self.screen, colors[0], coords, dimensions[0], 1)
-        pygame.draw.circle(self.screen, colors[1], coords, dimensions[1], 1)
-        pygame.draw.circle(self.screen, colors[2], coords, dimensions[2])
-
-    def draw_trap(self, coords, colors, dimensions):
-        '''Draw a trap: one outer shell: collision, then the trap.'''
-        pygame.draw.circle(self.screen, colors[0], coords, dimensions[0], 1)
-        pygame.draw.circle(self.screen, colors[1], coords, dimensions[1])
+        coord = self.get_coord(instance.coord)
+        if instance.perception_radius > 0:
+            pygame.draw.circle(self.screen, PERCEPT_COLOR, coord,
+                               instance.perception_radius, 1)
+        pygame.draw.circle(self.screen, COLLIDE_COLOR, coord,
+                           instance.collision_radius, 1)
+        if isinstance(instance, Predator):
+            color = PRED_COLOR
+        elif isinstance(instance, Pray):
+            color = PRAY_COLOR
+        else:
+            color = TRAP_COLOR
+        pygame.draw.circle(self.screen, color, coord,
+                           instance.collision_radius / 2)
 
     def get_coord(self, coord):
         '''Pygame knows only how to draw w/ integer coords.'''

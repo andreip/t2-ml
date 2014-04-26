@@ -2,7 +2,7 @@
 [game]
 x=700
 y=700
-pray_speed=3
+pray_speed=5
 pray_perception=35
 pray_collision=15
 pred_nr=3

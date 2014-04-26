@@ -6,6 +6,7 @@ import random
 import sys
 
 from ui.game import Draw
+from objects import Pray, Predator, Trap
 
 def get_config(config_file='config.rc'):
     '''Parse config file and return it in a form of dictionary like.'''
@@ -38,14 +39,19 @@ def generate_without_collision(collision_list, collision_radius):
         else:
             return coord
 
-def set_initial_positions(config):
-    '''Generate random positions for pray and attackers so that
+def get_game_instances(config):
+    '''Generate random positions for pray, attackers and traps
     no one collides with another one, initially.
+    Instantiate each object with its coordintes and return an
+    array of all of them.
     '''
+    instances = []
+
     # generate pray's position
     pray_collide_radius = config.getint('game','pray_collision')
     pray_coord = generate_without_collision([], pray_collide_radius)
-    config.set('game','pray_coord', pray_coord)
+    # Create a new Pray instance.
+    instances.append(Pray(config, pray_coord))
 
     # generate all predators w/o collision w/ existing ones.
     pred_coords = []
@@ -58,7 +64,8 @@ def set_initial_positions(config):
            map(lambda c: (c, pred_collide_radius), pred_coords)
         coord = generate_without_collision(collision_list, pred_collide_radius)
         pred_coords.append(coord)
-    config.set('game','pred_coords', pred_coords)
+        # Create a new Predator instance.
+        instances.append(Predator(config, coord))
 
     # generate all traps w/o collision w/ pray/predators.
     trap_coords = []
@@ -70,11 +77,13 @@ def set_initial_positions(config):
            map(lambda c: (c, trap_collide_radius), trap_coords)
         coord = generate_without_collision(collision_list, trap_collide_radius)
         trap_coords.append(coord)
-    config.set('game','trap_coords', trap_coords)
+        # Create a new Predator instance.
+        instances.append(Trap(config, coord))
+
+    return instances
 
 if __name__ == '__main__':
     config = get_config()
-    set_initial_positions(config)
-    Draw(config)
+    Draw(config, get_game_instances(config))
     #while True:
     #    pass
