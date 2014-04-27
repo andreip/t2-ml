@@ -47,14 +47,38 @@ class Draw:
                     running = False
                     break
             self.screen.fill(BLACK)
+
             for instance in self.instances:
                 self.draw_instance(instance)
                 # Move to new position.
                 instance.move()
-            BaseObject.resolve_collisions(self.instances)
+            self.instances = BaseObject.resolve_collisions(self.instances)
             pygame.display.flip()
 
+            game_ended = self.game_ended(self.instances)
+            if game_ended:
+                print 'game ended: ' + game_ended
+                # So screen stays longer.
+                pygame.time.delay(3000)
+                break
+
         pygame.quit()
+
+    def game_ended(self, instances):
+        '''Check if the game ended:
+        - pray and no predators
+        - predators and no pray
+        - none of them -> bug
+        '''
+        pray, pred, trap = BaseObject.count_instances(instances)
+
+        # At least one of them should remain.
+        assert(pray != 0 or pred != 0)
+
+        if pray == 0 and pred > 0:
+            return 'GAME OVER'
+        elif pray == 1 and pred == 0:
+            return 'YOU WIN'
 
     def draw_instance(self, instance):
         '''Draw a creature: two outer shells: perception, collision,
