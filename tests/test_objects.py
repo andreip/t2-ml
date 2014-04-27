@@ -95,3 +95,16 @@ class TestObjects(unittest.TestCase):
         self.assertEqual([o1, o2], BaseObject.resolve_collisions([o1, o2]))
         self.assertFalse(o1.is_dead())
         self.assertFalse(o2.is_dead())
+
+    def test_object_sees_object(self):
+        pray_r = self.config.getint('game', 'pray_perception')
+
+        o1 = Pray(self.config, (0, 0))
+        self.assertEqual(o1.perception_radius, pray_r)
+
+        o2 = Predator(self.config, (0, pray_r))
+        self.assertFalse(BaseObject.object_sees_object(o1, o2))
+
+        o3 = Predator(self.config, (0, pray_r - 1))
+        self.assertTrue(BaseObject.object_sees_object(o1, o3))
+

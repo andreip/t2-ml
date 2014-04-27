@@ -121,6 +121,12 @@ class BaseObject(object):
         return Helper.objects_collide(o1.coord, o1.collision_radius,
                                       o2.coord, o2.collision_radius)
 
+    @staticmethod
+    def object_sees_object(o1, o2):
+        '''First object can see second object.'''
+        return Helper.objects_collide(o1.coord, o1.perception_radius,
+                                      o2.coord, 0)
+
 
 class Pray(BaseObject):
     @property

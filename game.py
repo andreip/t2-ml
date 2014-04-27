@@ -3,9 +3,10 @@
 import random
 import sys
 
+from helper import Helper
 from ui.game import Draw
 from objects import BaseObject, Pray, Predator, Trap
-from helper import Helper
+from modules.preprocess import Preprocess
 
 class Game:
     '''The game class is dealing with actual manipulation of instances, by
@@ -13,16 +14,21 @@ class Game:
 
     One can reset the game and play again, as many times as it wants.
     '''
-    def __init__(self, config):
+    def __init__(self, config, preprocess):
         self.config = config
+        self.preprocess = preprocess
         self.restart_game()
+        self.verbose = self.config.getint('game', 'verbose')
 
     def play(self):
         ended = False
         while not ended:
+            # Extract components from current state.
+            self.preprocess.process_state(self.instances)
             self.play_round()
             ended = self.game_ended()
-        print 'game ended: ' + ended
+        if self.verbose:
+            print 'game ended: ' + ended
 
     def play_round(self):
         for instance in self.instances:
@@ -121,11 +127,17 @@ class Game:
 
 if __name__ == '__main__':
     config = Helper.get_config()
-    game = Game(config)
-    while True:
+    preprocess = Preprocess(config)
+    game = Game(config, preprocess)
+
+    #
+    # Preprocess module.
+    #
+    for i in range(config.getint('algo', 'preprocess_games')):
         # Play w/o gui
         game.play()
         game.restart_game()
-        # Play with gui
-        Draw(game)
-        break
+    print 'Have ' + str(len(preprocess.states)) + ' states after preprocess.'
+
+    # Play with gui
+    #Draw(game)

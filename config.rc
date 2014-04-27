@@ -12,6 +12,9 @@ pred_collision=15
 trap_nr=3
 trap_collision=30
 
+verbose=0
+
 # algorithm related numbers.
 [algo]
 k=10
+preprocess_games=100
