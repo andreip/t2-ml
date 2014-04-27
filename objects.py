@@ -116,8 +116,8 @@ class BaseObject(object):
 
     @staticmethod
     def objects_collide(o1, o2):
-        import game
-        return game.objects_collide(o1.coord, o1.collision_radius,
+        from game import Game
+        return Game.objects_collide(o1.coord, o1.collision_radius,
                                     o2.coord, o2.collision_radius)
 
 

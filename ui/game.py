@@ -1,7 +1,7 @@
 import pygame, math, sys
 from pygame.locals import *
 
-from objects import BaseObject, Pray, Predator, Trap
+from objects import Pray, Predator, Trap
 
 BLACK=(0,0,0)
 WHITE=(255,255,255)
@@ -19,12 +19,11 @@ PRED_COLOR=BLUE
 TRAP_COLOR=GRAY
 
 class Draw:
-    def __init__(self, config, instances):
-        self.config = config
-        resolution = (config.getint('game','x'),
-                      config.getint('game','y'))
+    def __init__(self, game):
+        resolution = (game.get_config().getint('game','x'),
+                      game.get_config().getint('game','y'))
         self.screen = pygame.display.set_mode(resolution, DOUBLEBUF)
-        self.instances = instances
+        self.game = game
         self.run()
 
     def run(self):
@@ -46,16 +45,14 @@ class Draw:
                 if event.key == K_ESCAPE:
                     running = False
                     break
-            self.screen.fill(BLACK)
 
-            for instance in self.instances:
+            self.screen.fill(BLACK)
+            for instance in self.game.get_instances():
                 self.draw_instance(instance)
-                # Move to new position.
-                instance.move()
-            self.instances = BaseObject.resolve_collisions(self.instances)
+            self.game.play()
             pygame.display.flip()
 
-            game_ended = self.game_ended(self.instances)
+            game_ended = self.game.game_ended()
             if game_ended:
                 print 'game ended: ' + game_ended
                 # So screen stays longer.
@@ -63,22 +60,6 @@ class Draw:
                 break
 
         pygame.quit()
-
-    def game_ended(self, instances):
-        '''Check if the game ended:
-        - pray and no predators
-        - predators and no pray
-        - none of them -> bug
-        '''
-        pray, pred, trap = BaseObject.count_instances(instances)
-
-        # At least one of them should remain.
-        assert(pray != 0 or pred != 0)
-
-        if pray == 0 and pred > 0:
-            return 'GAME OVER'
-        elif pray == 1 and pred == 0:
-            return 'YOU WIN'
 
     def draw_instance(self, instance):
         '''Draw a creature: two outer shells: perception, collision,
