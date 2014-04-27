@@ -20,6 +20,13 @@ class Game:
         self.restart_game()
 
     def play(self):
+        ended = False
+        while not ended:
+            self.play_round()
+            ended = self.game_ended()
+        print 'game ended: ' + ended
+
+    def play_round(self):
         for instance in self.instances:
             instance.move()
         self.instances = BaseObject.resolve_collisions(self.instances)
@@ -27,10 +34,12 @@ class Game:
     def restart_game(self):
         self.instances = self.__get_initial_game_instances()
 
-    def get_instances(self):
+    @property
+    def instances(self):
         return self.instances
 
-    def get_config(self):
+    @property
+    def config(self):
         return self.config
 
     def game_ended(self):
@@ -55,7 +64,6 @@ class Game:
         actual_dist = math.sqrt(abs(x1 - x2)**2 + abs(y1 - y2)**2)
         no_collision_dist = rad1 + rad2
         return actual_dist < no_collision_dist
-
 
     def __get_initial_game_instances(self):
         '''Generate random positions for pray, attackers and traps
@@ -131,7 +139,9 @@ class Game:
 if __name__ == '__main__':
     game = Game()
     while True:
-        Draw(game)
+        # Play w/o gui
+        game.play()
         game.restart_game()
+        # Play with gui
         Draw(game)
         break

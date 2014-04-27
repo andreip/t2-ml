@@ -20,8 +20,8 @@ TRAP_COLOR=GRAY
 
 class Draw:
     def __init__(self, game):
-        resolution = (game.get_config().getint('game','x'),
-                      game.get_config().getint('game','y'))
+        resolution = (game.config.getint('game','x'),
+                      game.config.getint('game','y'))
         self.screen = pygame.display.set_mode(resolution, DOUBLEBUF)
         self.game = game
         self.run()
@@ -47,9 +47,9 @@ class Draw:
                     break
 
             self.screen.fill(BLACK)
-            for instance in self.game.get_instances():
+            for instance in self.game.instances:
                 self.draw_instance(instance)
-            self.game.play()
+            self.game.play_round()
             pygame.display.flip()
 
             game_ended = self.game.game_ended()
