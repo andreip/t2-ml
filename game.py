@@ -129,6 +129,7 @@ if __name__ == '__main__':
     config = Helper.get_config()
     preprocess = Preprocess(config)
     game = Game(config, preprocess)
+    kmeans = KMeans(config)
 
     #
     # Preprocess module.
