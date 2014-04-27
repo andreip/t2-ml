@@ -2,13 +2,12 @@ import random
 import unittest
 
 from objects import *
-from game import Game
+from helper import Helper
 
 class TestObjects(unittest.TestCase):
 
     def setUp(self):
-        self.game = Game()
-        self.config = self.game.config
+        self.config = Helper.get_config()
 
     def test_objects_collide(self):
         pray_r = self.config.getint('game', 'pray_collision')

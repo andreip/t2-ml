@@ -1,6 +1,8 @@
 import math
 import random
 
+from helper import Helper
+
 class BaseObject(object):
     def __init__(self, config, coord):
         self.config = config
@@ -116,9 +118,8 @@ class BaseObject(object):
 
     @staticmethod
     def objects_collide(o1, o2):
-        from game import Game
-        return Game.objects_collide(o1.coord, o1.collision_radius,
-                                    o2.coord, o2.collision_radius)
+        return Helper.objects_collide(o1.coord, o1.collision_radius,
+                                      o2.coord, o2.collision_radius)
 
 
 class Pray(BaseObject):

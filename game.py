@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 
-import ConfigParser
-import io
-import math
 import random
 import sys
 
 from ui.game import Draw
 from objects import BaseObject, Pray, Predator, Trap
+from helper import Helper
 
 class Game:
     '''The game class is dealing with actual manipulation of instances, by
@@ -15,8 +13,8 @@ class Game:
 
     One can reset the game and play again, as many times as it wants.
     '''
-    def __init__(self, config_file='config.rc'):
-        self.config = self.__open_config(config_file)
+    def __init__(self, config):
+        self.config = config
         self.restart_game()
 
     def play(self):
@@ -56,14 +54,6 @@ class Game:
         elif pray == 1 and pred == 0:
             return 'YOU WIN'
         return False
-
-    @staticmethod
-    def objects_collide(pos1, rad1, pos2, rad2):
-        '''Detects if two objects touch another.'''
-        (x1, y1), (x2, y2) = pos1, pos2
-        actual_dist = math.sqrt(abs(x1 - x2)**2 + abs(y1 - y2)**2)
-        no_collision_dist = rad1 + rad2
-        return actual_dist < no_collision_dist
 
     def __get_initial_game_instances(self):
         '''Generate random positions for pray, attackers and traps
@@ -119,8 +109,8 @@ class Game:
             coord = (random.random()*x, random.random()*y)
             # new generated coord should not conflict w/ collision list.
             for (coord2, collision_radius2) in collision_list:
-                if Game.objects_collide(coord, collision_radius,
-                                        coord2, collision_radius2):
+                if Helper.objects_collide(coord, collision_radius,
+                                          coord2, collision_radius2):
                     break
             # did not break, thus no collision w/ any of coords from list.
             else:
@@ -129,15 +119,9 @@ class Game:
     def __get_dimensions(self):
         return self.config.getint('game','x'), self.config.getint('game','y')
 
-    def __open_config(self, config_file):
-        with open(config_file) as f:
-            # Read values from config file
-            config = ConfigParser.RawConfigParser(allow_no_value=True)
-            config.readfp(io.BytesIO(f.read()))
-        return config
-
 if __name__ == '__main__':
-    game = Game()
+    config = Helper.get_config()
+    game = Game(config)
     while True:
         # Play w/o gui
         game.play()
