@@ -29,10 +29,6 @@ class BaseObject(object):
     def kill(self):
         self.killed = True
 
-    def move(self):
-        '''By default, it does not move :).'''
-        pass
-
     def set_new_direction(self):
         self.direction = random.randrange(0,360)
 
@@ -56,12 +52,7 @@ class BaseObject(object):
 
     def get_next_position(self):
         '''Use speed and direction to calculate next position.'''
-        (x,y) = self.coord
-        # Or math.radians(self.direction) :).
-        rad = self.direction * math.pi / 180
-        x += self.speed * math.cos(rad)
-        y += self.speed * math.sin(rad)
-        return (x,y)
+        return Helper.get_final_position(self.coord, self.direction, self.speed)
 
     @property
     def collision_radius(self):
@@ -150,6 +141,22 @@ class Pray(BaseObject):
 
     def get_type_letter(self):
         return 'P'
+
+    def move(self):
+        '''Pray should avoid colliding with traps if it sees them.'''
+        for instance in self.game.instances:
+            if isinstance(instance, Trap):
+                # In case the pray sees a trap, try and avoid it.
+                if BaseObject.object_sees_object(self, instance):
+                    distance = Helper.euclidian_distance(self.coord, instance.coord)
+                    future_point = Helper.get_final_position(self.coord,
+                        self.direction, distance)
+                    if Helper.objects_collide(future_point,
+                                              self.collision_radius,
+                                              instance.coord,
+                                              instance.collision_radius):
+                        self.set_new_direction()
+        super(Pray, self).move()
 
 class Predator(BaseObject):
     @property

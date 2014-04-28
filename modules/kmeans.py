@@ -1,6 +1,7 @@
 from collections import defaultdict
-import math
 import random
+
+from helper import Helper
 
 class KMeans:
     def __init__(self, config, game):
@@ -136,10 +137,10 @@ class KMeans:
         '''Find the best state out of states array to match
         the given state.
         '''
-        best_d = self.__euclidian_distance(state, states[0])
+        best_d = Helper.euclidian_distance(state, states[0])
         best_state = states[0]
         for state2 in states[1:]:
-            d = self.__euclidian_distance(state, state2)
+            d = Helper.euclidian_distance(state, state2)
             if best_d > d:
                 best_d = d
                 best_state = state2
@@ -148,11 +149,3 @@ class KMeans:
     def __add_coords(self, coord1, coord2):
         assert(len(coord1) == len(coord2))
         return tuple([coord1[i] + coord2[i] for i in range(len(coord1))])
-
-    def __euclidian_distance(self, p1, p2):
-        '''Euclidian distance between two points.'''
-        assert(len(p1) == len(p2))
-        s = 0
-        for i in range(len(p1)):
-            s += (p1[i] - p2[i])**2
-        return math.sqrt(s)

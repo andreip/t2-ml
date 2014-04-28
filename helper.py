@@ -31,3 +31,23 @@ class Helper:
     def object_sees_object(coord1, coord2, radius):
         '''First object can see second object.'''
         return Helper.objects_collide(coord1, radius, coord2, 0)
+
+    @staticmethod
+    def euclidian_distance(p1, p2):
+        '''Euclidian distance between two points.'''
+        assert(len(p1) == len(p2))
+        s = 0
+        for i in range(len(p1)):
+            s += (p1[i] - p2[i])**2
+        return math.sqrt(s)
+
+    @staticmethod
+    def get_final_position(coord, angle, distance):
+        '''Calculate where the coord would end up with the
+        angle, if it were to move for distance.
+        '''
+        (x,y) = coord
+        rad = math.radians(angle)
+        x += distance * math.cos(rad)
+        y += distance * math.sin(rad)
+        return (x,y)
