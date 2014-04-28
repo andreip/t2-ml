@@ -4,9 +4,10 @@ import random
 from helper import Helper
 
 class BaseObject(object):
-    def __init__(self, config, coord):
+    def __init__(self, config, coord, game):
         self.config = config
         self.coord = coord
+        self.game = game
         # Common properties for objects.
         self.gameX = config.getint('game', 'x')
         self.gameY = config.getint('game', 'y')
@@ -56,6 +57,7 @@ class BaseObject(object):
     def get_next_position(self):
         '''Use speed and direction to calculate next position.'''
         (x,y) = self.coord
+        # Or math.radians(self.direction) :).
         rad = self.direction * math.pi / 180
         x += self.speed * math.cos(rad)
         y += self.speed * math.sin(rad)
@@ -133,9 +135,7 @@ class BaseObject(object):
     @staticmethod
     def object_sees_object(o1, o2):
         '''First object can see second object.'''
-        return Helper.objects_collide(o1.coord, o1.perception_radius,
-                                      o2.coord, 0)
-
+        return Helper.object_sees_object(o1.coord, o2.coord, o1.perception_radius)
 
 class Pray(BaseObject):
     @property
@@ -164,6 +164,18 @@ class Predator(BaseObject):
 
     def get_type_letter(self):
         return 'p'
+
+    def move(self):
+        '''Predator is pretty dumb: if it sees a pray, it follows it to
+        autodestruction.
+        '''
+        # Can always do indexing on filtered instances, as it should be a pray
+        # always, else the game should have finished (bug?).
+        pray = filter(lambda x: isinstance(x, Pray), self.game.instances)[0]
+        # In case it sees the pray, change direction to follow it.
+        if BaseObject.object_sees_object(self, pray):
+            self.direction = Helper.get_direction_towards(self.coord, pray.coord)
+        super(Predator, self).move()
 
 class Trap(BaseObject):
     def move(self):

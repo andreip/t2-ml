@@ -10,9 +10,9 @@ from modules.preprocess import Preprocess
 class TestObjects(unittest.TestCase):
     def setUp(self):
         self.config = Helper.get_config()
-        self.kmeans = KMeans(self.config)
         self.preprocess = Preprocess(self.config)
         self.game = Game(self.config, self.preprocess)
+        self.kmeans = KMeans(self.config, self.game)
         self.pred_nr = self.config.getint('game', 'pred_nr')
         self.trap_nr = self.config.getint('game', 'trap_nr')
 

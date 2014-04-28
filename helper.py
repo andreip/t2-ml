@@ -19,3 +19,15 @@ class Helper:
         no_collision_dist = rad1 + rad2
         return actual_dist < no_collision_dist
 
+    @staticmethod
+    def get_direction_towards(p1, p2):
+        '''Get direction from p1 to p2 (in degrees).'''
+        (xf,yf) = p2
+        (x,y) = p1
+        rad = math.atan2(yf-y, xf-x)
+        return math.degrees(rad)
+
+    @staticmethod
+    def object_sees_object(coord1, coord2, radius):
+        '''First object can see second object.'''
+        return Helper.objects_collide(coord1, radius, coord2, 0)

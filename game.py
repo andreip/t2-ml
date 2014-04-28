@@ -75,7 +75,7 @@ class Game:
         pray_collide_radius = self.config.getint('game','pray_collision')
         pray_coord = self.__generate_coord_without_collision([], pray_collide_radius)
         # Create a new Pray instance.
-        instances.append(Pray(self.config, pray_coord))
+        instances.append(Pray(self.config, pray_coord, self))
 
         # generate all predators w/o collision w/ existing ones.
         pred_coords = []
@@ -90,7 +90,7 @@ class Game:
                                                             pred_collide_radius)
             pred_coords.append(coord)
             # Create a new Predator instance.
-            instances.append(Predator(self.config, coord))
+            instances.append(Predator(self.config, coord, self))
 
         # generate all traps w/o collision w/ pray/predators.
         trap_coords = []
@@ -104,7 +104,7 @@ class Game:
                                                             trap_collide_radius)
             trap_coords.append(coord)
             # Create a new Predator instance.
-            instances.append(Trap(self.config, coord))
+            instances.append(Trap(self.config, coord, self))
 
         return instances
 

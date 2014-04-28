@@ -2,22 +2,26 @@ import random
 import unittest
 
 from objects import *
+from game import Game
 from helper import Helper
+from modules.preprocess import Preprocess
 
 class TestObjects(unittest.TestCase):
 
     def setUp(self):
         self.config = Helper.get_config()
+        self.preprocess = Preprocess(self.config)
+        self.game = Game(self.config, self.preprocess)
 
     def test_objects_collide(self):
         pray_r = self.config.getint('game', 'pray_collision')
         pred_r = self.config.getint('game', 'pred_collision')
 
-        o1 = Pray(self.config, (0, 0))
+        o1 = Pray(self.config, (0, 0), self.game)
         self.assertEqual(o1.coord, (0,0))
         self.assertEqual(o1.collision_radius, pray_r)
 
-        o2 = Predator(self.config, (0, pray_r + pred_r - 1))
+        o2 = Predator(self.config, (0, pray_r + pred_r - 1), self.game)
         self.assertEqual(o2.coord, (0, pray_r + pred_r - 1))
         self.assertEqual(o2.collision_radius, pred_r)
 
@@ -31,7 +35,7 @@ class TestObjects(unittest.TestCase):
         self.config.set('game', 'y', '300')
         self.config.set('game', 'pray_collision', '15')
         coord_pray = (128.83141588437942, 294.753514205884)
-        Pray(self.config, coord_pray).move()
+        Pray(self.config, coord_pray, self.game).move()
 
     def test_resolve_collision_pray_predator(self):
         '''Test collision resolution between multiple predators
@@ -40,13 +44,13 @@ class TestObjects(unittest.TestCase):
         pray_r = self.config.getint('game', 'pray_collision')
         pred_r = self.config.getint('game', 'pred_collision')
 
-        pray = Pray(self.config, (0, 0))
+        pray = Pray(self.config, (0, 0), self.game)
         instances = [pray]
 
         nr_pred = random.randint(1,3)
         predators = []
         for i in range(nr_pred):
-            pred = Predator(self.config, (0, pray_r + pred_r - 1))
+            pred = Predator(self.config, (0, pray_r + pred_r - 1), self.game)
             self.assertTrue(BaseObject.objects_collide(pray, pred))
             predators.append(pred)
             instances.append(pred)
@@ -69,12 +73,12 @@ class TestObjects(unittest.TestCase):
         pray_r = self.config.getint('game', 'pray_collision')
         pred_r = self.config.getint('game', 'pred_collision')
 
-        trap = Trap(self.config, (0,0))
+        trap = Trap(self.config, (0,0), self.game)
         instances = [trap]
         if random.random() < 0.5:
-            o = Pray(self.config, (0, trap_r + pray_r - 1))
+            o = Pray(self.config, (0, trap_r + pray_r - 1), self.game)
         else:
-            o = Predator(self.config, (0, trap_r + pred_r - 1))
+            o = Predator(self.config, (0, trap_r + pred_r - 1), self.game)
         instances.append(o)
 
         self.assertTrue(BaseObject.objects_collide(trap, o))
@@ -88,8 +92,8 @@ class TestObjects(unittest.TestCase):
         '''Test both the predators survive if they collide.'''
         pred_r = self.config.getint('game', 'pred_collision')
 
-        o1 = Predator(self.config, (0, 0))
-        o2 = Predator(self.config, (0, pred_r + pred_r - 1))
+        o1 = Predator(self.config, (0, 0), self.game)
+        o2 = Predator(self.config, (0, pred_r + pred_r - 1), self.game)
         self.assertTrue(BaseObject.objects_collide(o1, o2))
 
         self.assertEqual([o1, o2], BaseObject.resolve_collisions([o1, o2]))
@@ -99,12 +103,12 @@ class TestObjects(unittest.TestCase):
     def test_object_sees_object(self):
         pray_r = self.config.getint('game', 'pray_perception')
 
-        o1 = Pray(self.config, (0, 0))
+        o1 = Pray(self.config, (0, 0), self.game)
         self.assertEqual(o1.perception_radius, pray_r)
 
-        o2 = Predator(self.config, (0, pray_r))
+        o2 = Predator(self.config, (0, pray_r), self.game)
         self.assertFalse(BaseObject.object_sees_object(o1, o2))
 
-        o3 = Predator(self.config, (0, pray_r - 1))
+        o3 = Predator(self.config, (0, pray_r - 1), self.game)
         self.assertTrue(BaseObject.object_sees_object(o1, o3))
 
