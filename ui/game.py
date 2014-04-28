@@ -46,12 +46,8 @@ class Draw:
                     running = False
                     break
 
-            self.screen.fill(BLACK)
-            for instance in self.game.instances:
-                self.draw_instance(instance)
+            self.draw_round()
             self.game.play_round()
-            pygame.display.flip()
-
             game_ended = self.game.game_ended()
             if game_ended:
                 print 'game ended: ' + game_ended
@@ -60,6 +56,12 @@ class Draw:
                 break
 
         pygame.quit()
+
+    def draw_round(self):
+        self.screen.fill(BLACK)
+        for instance in self.game.instances:
+            self.draw_instance(instance)
+        pygame.display.flip()
 
     def draw_instance(self, instance):
         '''Draw a creature: two outer shells: perception, collision,
