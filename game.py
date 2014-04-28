@@ -6,6 +6,7 @@ import sys
 from helper import Helper
 from ui.game import Draw
 from objects import BaseObject, Pray, Predator, Trap
+from modules.kmeans import KMeans
 from modules.preprocess import Preprocess
 
 class Game:
@@ -54,8 +55,9 @@ class Game:
         '''
         pray, pred, trap = BaseObject.count_instances(self.instances)
         # At least one of them should remain.
-        assert(pray != 0 or pred != 0)
-        if pray == 0 and pred > 0:
+        # TODO checkout why this assert doesn't always hold.
+        #assert(pray != 0 or pred != 0)
+        if pray == 0 and pred >= 0:
             return 'GAME OVER'
         elif pray == 1 and pred == 0:
             return 'YOU WIN'
@@ -129,7 +131,7 @@ if __name__ == '__main__':
     config = Helper.get_config()
     preprocess = Preprocess(config)
     game = Game(config, preprocess)
-    kmeans = KMeans(config)
+    kmeans = KMeans(config, game)
 
     #
     # Preprocess module.
@@ -139,6 +141,10 @@ if __name__ == '__main__':
         game.play()
         game.restart_game()
     print 'Have ' + str(len(preprocess.states)) + ' states after preprocess.'
+
+    # Reduce the number of states.
+    cluster_states = kmeans.kmeans(preprocess.states)
+    print 'Have ' + str(len(cluster_states)) + ' states after kmeans.'
 
     # Play with gui
     #Draw(game)
