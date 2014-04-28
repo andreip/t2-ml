@@ -13,6 +13,7 @@ class BaseObject(object):
         self.gameY = config.getint('game', 'y')
         self.set_new_direction()
         self.killed = False
+        self.speed = self.get_speed()
 
     def trunc(self, f, n):
         '''Truncates/pads a float f to n decimal places without rounding'''
@@ -60,8 +61,8 @@ class BaseObject(object):
     @property
     def perception_radius(self):
         raise NotImplementedError
-    @property
-    def speed(self):
+
+    def get_speed(self):
         raise NotImplementedError
 
     @staticmethod
@@ -135,8 +136,8 @@ class Pray(BaseObject):
     @property
     def perception_radius(self):
         return self.config.getint('game', 'pray_perception')
-    @property
-    def speed(self):
+
+    def get_speed(self):
         return self.config.getint('game', 'pray_speed')
 
     def get_type_letter(self):
@@ -165,8 +166,8 @@ class Predator(BaseObject):
     @property
     def perception_radius(self):
         return self.config.getint('game', 'pred_perception')
-    @property
-    def speed(self):
+
+    def get_speed(self):
         return self.config.getint('game', 'pred_speed')
 
     def get_type_letter(self):
@@ -182,6 +183,27 @@ class Predator(BaseObject):
         # In case it sees the pray, change direction to follow it.
         if BaseObject.object_sees_object(self, pray):
             self.direction = Helper.get_direction_towards(self.coord, pray.coord)
+
+            # Try and find close predators and sync with them to arrive at the
+            # prey in the same time.
+            #
+            # The sync works the following way:
+            # - each predator finds the max speed and max distance to pray
+            #   (from all predators visible from him that they follow the pray)
+            # - they update their speed v' = v_max * d / d_max
+            #   where d = own distance to pray
+            max_speed = self.speed
+            own_dist = max_dist = Helper.euclidian_distance(self.coord, pray.coord)
+            for instance in self.game.instances:
+                if instance == self or not isinstance(instance, Predator):
+                    continue
+                # Look only for visible predators other than myself.
+                if BaseObject.object_sees_object(self, instance):
+                    dist = Helper.euclidian_distance(instance.coord, pray.coord)
+                    max_dist = max(max_dist, dist)
+                    max_speed = max(max_speed, instance.speed)
+            # Sync speed with other predators.
+            self.speed = max_speed * own_dist / float(max_dist)
         super(Predator, self).move()
 
 class Trap(BaseObject):
@@ -195,8 +217,8 @@ class Trap(BaseObject):
     @property
     def perception_radius(self):
         return 0
-    @property
-    def speed(self):
+
+    def get_speed(self):
         return 0
 
     def get_type_letter(self):
