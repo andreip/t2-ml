@@ -13,6 +13,15 @@ class BaseObject(object):
         self.set_new_direction()
         self.killed = False
 
+    def trunc(self, f, n):
+        '''Truncates/pads a float f to n decimal places without rounding'''
+        return ('%.*f' % (n + 1, f))[:-1]
+
+    def __str__(self):
+        coord = map(lambda c: float(self.trunc(c, 2)), self.coord)
+        return '(' + str(coord) + ',' + self.get_type_letter() + ')'
+    __repr__ = __str__
+
     def is_dead(self):
         return self.killed
 
@@ -139,6 +148,9 @@ class Pray(BaseObject):
     def speed(self):
         return self.config.getint('game', 'pray_speed')
 
+    def get_type_letter(self):
+        return 'P'
+
 class Predator(BaseObject):
     @property
     def collision_radius(self):
@@ -149,6 +161,9 @@ class Predator(BaseObject):
     @property
     def speed(self):
         return self.config.getint('game', 'pred_speed')
+
+    def get_type_letter(self):
+        return 'p'
 
 class Trap(BaseObject):
     def move(self):
@@ -164,3 +179,6 @@ class Trap(BaseObject):
     @property
     def speed(self):
         return 0
+
+    def get_type_letter(self):
+        return 'T'
