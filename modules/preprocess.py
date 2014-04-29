@@ -1,12 +1,14 @@
+import sys
+
 from objects import BaseObject, Pray, Predator, Trap
 
 class Preprocess:
+    INFINITY = sys.maxint
+
     def __init__(self, config):
         # Keep a record of all the states a k
         self.states = set()
         self.config = config
-        self.infinity = 10 * max(config.getint('game', 'x'),
-                                 config.getint('game', 'y'))
 
     @property
     def states(self):
@@ -49,10 +51,10 @@ class Preprocess:
                     visible_traps)
         while len(predators) < pred_nr:
             # Append a big number, way bigger than the map.
-            predators.append((self.infinity, self.infinity))
+            predators.append((Preprocess.INFINITY, Preprocess.INFINITY))
         while len(traps) < trap_nr:
             # Append a big number, way bigger than the map.
-            traps.append((self.infinity, self.infinity))
+            traps.append((Preprocess.INFINITY, Preprocess.INFINITY))
         return tuple(predators + traps)
 
     def get_relative_coord(self, coord1, coord2):

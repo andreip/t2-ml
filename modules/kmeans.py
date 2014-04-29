@@ -2,6 +2,7 @@ from collections import defaultdict
 import random
 
 from helper import Helper
+from modules.preprocess import Preprocess
 
 class KMeans:
     def __init__(self, config, game):
@@ -28,14 +29,19 @@ class KMeans:
             if clusters == new_clusters:
                 break
             clusters = new_clusters
-        from nose.tools import set_trace; set_trace()
-        return centroids
+
+        # Keep only those centroids that have at least one member in them.
+        centroids_count = self.get_centroids_count(clusters)
+        print 'Centroids stats: ' + str(centroids_count)
+
+        non_empty_centroids = map(lambda k: centroids[k], centroids_count.keys())
+        return non_empty_centroids
 
     def kmeans_centroids(self, clusters):
         '''Calculate centroids based on clusters by doing a mean between
         all states within the same cluster.
         '''
-        self.pretty_print_clusters(clusters)
+        Helper.verbose_print('Centroids: ' + str(self.get_centroids_count(clusters)))
         new_centroids = [0 for _ in range(self.k)]
         for i in range(self.k):
             state_sum = tuple([(0,0) for _ in range(self.coord_nr)])
@@ -45,22 +51,17 @@ class KMeans:
                     nr += 1
                     state_sum = self.add_states(state_sum, state)
             # At least one representat for a cluster should exist.
-            #assert(nr > 0)
             if nr > 0:
                 # Now divide by the number of members in a cluster every coordinate.
-                new_centroids[i] = map(lambda coord: tuple([c / nr for c in coord]),
+                new_centroids[i] = map(lambda coord: self.__divide_coord(coord, nr),
                                        state_sum)
+            # Treat the case of finding no member in cluster by making it be
+            # infinity everywhere.
             else:
-                new_centroids[i] = map(lambda coord: tuple([self.game.preprocess.infinity
+                new_centroids[i] = map(lambda coord: tuple([Preprocess.INFINITY
                                                             for c in coord]),
                                        state_sum)
         return new_centroids
-
-    def pretty_print_clusters(self, clusters):
-        d = defaultdict(int)
-        for _,cluster in clusters.iteritems():
-            d[cluster] += 1
-        print d
 
     def kmeans_clusters(self, instances, centroids):
         '''Create a hashtable of instance-index in centroids list.'''
@@ -75,6 +76,23 @@ class KMeans:
                     cluster_index = i
             clusters[instance] = cluster_index
         return clusters
+
+    def get_centroids_count(self, clusters):
+        d = defaultdict(int)
+        for _,cluster in clusters.iteritems():
+            d[cluster] += 1
+        return d
+
+    def detail_print_clusters(self, clusters, n=10):
+        for i in range(self.k):
+            found = 0
+            print '--- cluster ' + str(i) + ' ---'
+            for val,cluster in clusters.iteritems():
+                if cluster == i:
+                    print val
+                    found += 1
+                    if found == n:
+                        break
 
     def add_states(self, state1, state2):
         if not state1:
@@ -149,3 +167,6 @@ class KMeans:
     def __add_coords(self, coord1, coord2):
         assert(len(coord1) == len(coord2))
         return tuple([coord1[i] + coord2[i] for i in range(len(coord1))])
+
+    def __divide_coord(self, coord, nr):
+        return tuple([coord[i] / nr for i in range(len(coord))])

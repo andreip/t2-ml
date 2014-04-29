@@ -51,3 +51,9 @@ class Helper:
         x += distance * math.cos(rad)
         y += distance * math.sin(rad)
         return (x,y)
+
+    @staticmethod
+    def verbose_print(msg):
+        config = Helper.get_config()
+        if config.getint('game', 'verbose'):
+            print msg
