@@ -4,7 +4,7 @@ import random
 import sys
 
 from helper import Helper
-from ui.game import Draw
+from gui import GUI
 from objects import BaseObject, Pray, Predator, Trap
 from modules.kmeans import KMeans
 from modules.preprocess import Preprocess
@@ -141,6 +141,26 @@ class Game:
     def __get_dimensions(self):
         return self.config.getint('game','x'), self.config.getint('game','y')
 
+def run_games(number_of_games, game, sarsa, with_gui=False):
+    '''Runs a number of games.'''
+    total_games = number_of_games
+    won_games = 0
+    while number_of_games > 0:
+        if with_gui:
+            gui = GUI(game)
+        game.restart_game()
+        game_ended = game.game_ended()
+        while not game_ended:
+            _, action = sarsa.get_state_and_action()
+            game.pray.set_direction(action)
+            game.play_round()
+            if with_gui:
+                gui.draw()
+            game_ended = game.game_ended()
+        number_of_games -= 1
+        won_games += (game_ended == Helper.WON)
+    print 'Won ' + str(won_games) + '/' + str(total_games) + ' total games.'
+
 if __name__ == '__main__':
     config = Helper.get_config()
     preprocess = Preprocess(config)
@@ -182,22 +202,12 @@ if __name__ == '__main__':
     print 'Done!'
 
     #
-    # Playing now, after we've learned.
+    # Running in batches and do statistics.
     #
-    total_games = playing_games = config.getint('algo', 'playing_games')
-    print 'Playing for ' + str(playing_games) + ' games.'
-    won_games = 0
-    while playing_games > 0:
-        gui = Draw(game)
-        game.restart_game()
-        game_ended = game.game_ended()
-        while not game_ended:
-            _, action = sarsa.get_state_and_action()
-            game.pray.set_direction(action)
-            game.play_round()
-            gui.draw()
-            game_ended = game.game_ended()
-        playing_games -= 1
-        won_games += (game_ended == Helper.WON)
+    for i in range(config.getint('algo', 'batch_runs')):
+        run_games(config.getint('algo', 'batch_size'), game, sarsa)
 
-    print 'Won ' + str(won_games) + '/' + str(total_games) + ' total games.'
+    #
+    # Playing with GUI now, after we've learned.
+    #
+    run_games(config.getint('algo', 'gui_games'), game, sarsa, True)

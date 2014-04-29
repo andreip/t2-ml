@@ -18,7 +18,7 @@ PRAY_COLOR=YELLOW
 PRED_COLOR=BLUE
 TRAP_COLOR=GRAY
 
-class Draw:
+class GUI:
     def __init__(self, game):
         resolution = (game.config.getint('game','x'),
                       game.config.getint('game','y'))
