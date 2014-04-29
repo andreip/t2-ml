@@ -8,6 +8,8 @@ from ui.game import Draw
 from objects import BaseObject, Pray, Predator, Trap
 from modules.kmeans import KMeans
 from modules.preprocess import Preprocess
+from modules.sarsa import Sarsa
+
 
 class Game:
     '''The game class is dealing with actual manipulation of instances, by
@@ -47,6 +49,17 @@ class Game:
     def config(self):
         return self.config
 
+    @property
+    def pray(self):
+        '''Returns the pray instance.'''
+        r = filter(lambda o : isinstance(o, Pray), self.instances)
+        return r[0] if r else None
+
+    def get_allowed_states(self):
+        '''The allowed moves are the directions (in interval [0,360) degrees ).
+        '''
+        return range(359)
+
     def game_ended(self):
         '''Check if the game ended:
         - pray and no predators
@@ -58,9 +71,9 @@ class Game:
         # TODO checkout why this assert doesn't always hold.
         #assert(pray != 0 or pred != 0)
         if pray == 0 and pred >= 0:
-            return 'GAME OVER'
+            return Helper.LOST
         elif pray == 1 and pred == 0:
-            return 'YOU WIN'
+            return Helper.WON
         return False
 
     def __get_initial_game_instances(self):
@@ -132,6 +145,7 @@ if __name__ == '__main__':
     preprocess = Preprocess(config)
     game = Game(config, preprocess)
     kmeans = KMeans(config, game)
+    sarsa = Sarsa(config, game)
 
     #
     # Preprocess module.
@@ -145,6 +159,33 @@ if __name__ == '__main__':
     # Reduce the number of states.
     cluster_states = kmeans.kmeans(preprocess.states)
     print 'Have ' + str(len(cluster_states)) + ' states after kmeans.'
+
+    # Learn games now, train and build Q.
+    game.restart_game()
+    learning_games = config.getint('algo', 'learning_games')
+    state = preprocess.get_state(game.instances)
+    # TODO add a filter to states so it returns a state from those from kmeans
+    action = sarsa.get_action(state, game.get_allowed_states())
+    while learning_games > 0:
+        game.pray.set_direction(action)
+        # Execute the action a from state s, going to state s'.
+        game.play_round()
+
+        game_ended = game.game_ended()
+        if game_ended:
+            game.restart_game()
+            learning_games -= 1
+            # This will determine the state to not be found in utilities
+            # and thus return 0 always, promoting only the reward (as it's a
+            # final step in game).
+            next_state = next_action = 0
+        else:
+            next_state = preprocess.get_state(game.instances)
+            # Get next action and its reward for s -> s'.
+            next_action = sarsa.get_action(next_state, game.get_allowed_states())
+        # Update utilities and update (s,a) <- (s', a').
+        sarsa.update_utilities(state, action, next_state, next_action, game_ended)
+        state, action = next_state, next_action
 
     # Play with gui
     #Draw(game)

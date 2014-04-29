@@ -3,6 +3,9 @@ import math
 import io
 
 class Helper:
+    WON = 'YOU WIN'
+    LOST = 'GAME OVER'
+
     @staticmethod
     def get_config(config_file='config.rc'):
         with open(config_file) as f:

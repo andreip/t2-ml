@@ -33,6 +33,9 @@ class BaseObject(object):
     def set_new_direction(self):
         self.direction = random.randrange(0,360)
 
+    def set_direction(self, direction):
+        self.direction = direction
+
     def move(self):
         '''Execute a move based on the direction and
         the speed, don't keep count of any radius collision
