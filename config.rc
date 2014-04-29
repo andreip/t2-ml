@@ -17,8 +17,9 @@ verbose=0
 # algorithm related numbers.
 [algo]
 k=16
-preprocess_games=100
-learning_games=1
+preprocess_games=10
+learning_games=10
+playing_games=10
 learning_alpha=0.1
 learning_eps=0.1
 learning_gamma=0.8

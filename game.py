@@ -166,16 +166,38 @@ if __name__ == '__main__':
     # kmeans.
     recognizer = Recognizer(config, cluster_states)
 
+    learning_games = config.getint('algo', 'learning_games')
+    print 'Learning for ' + str(learning_games) + ' games...',
     #
     # Sarsa learning ; play games and learn.
     #
     sarsa = Sarsa(config, game, preprocess, recognizer)
     learning_games = config.getint('algo', 'learning_games')
     while learning_games > 0:
-        gui = Draw(game)
         game.restart_game()
         sarsa.begin_episode()
         while not game.game_ended():
             sarsa.step()
-            gui.draw()
         learning_games -= 1
+    print 'Done!'
+
+    #
+    # Playing now, after we've learned.
+    #
+    total_games = playing_games = config.getint('algo', 'playing_games')
+    print 'Playing for ' + str(playing_games) + ' games.'
+    won_games = 0
+    while playing_games > 0:
+        gui = Draw(game)
+        game.restart_game()
+        game_ended = game.game_ended()
+        while not game_ended:
+            _, action = sarsa.get_state_and_action()
+            game.pray.set_direction(action)
+            game.play_round()
+            gui.draw()
+            game_ended = game.game_ended()
+        playing_games -= 1
+        won_games += (game_ended == Helper.WON)
+
+    print 'Won ' + str(won_games) + '/' + str(total_games) + ' total games.'
