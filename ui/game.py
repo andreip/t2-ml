@@ -24,44 +24,37 @@ class Draw:
                       game.config.getint('game','y'))
         self.screen = pygame.display.set_mode(resolution, DOUBLEBUF)
         self.game = game
-        self.run()
+        self.clock = pygame.time.Clock()
+        self.running = True
 
-    def run(self):
-        clock = pygame.time.Clock()
-        running = True
-        while running:
-            clock.tick(30)
+    def draw(self):
+        if self.running == False:
+            return
 
-            # USER INPUT
-            for event in pygame.event.get():
-                # In case of quit
-                if event.type == pygame.QUIT:
-                    running = False
-                    break
+        #self.clock.tick(30)
 
-                if not hasattr(event, 'key'):
-                    continue
-                down = event.type == KEYDOWN
-                if event.key == K_ESCAPE:
-                    running = False
-                    break
-
-            self.draw_round()
-            self.game.play_round()
-            game_ended = self.game.game_ended()
-            if game_ended:
-                print 'game ended: ' + game_ended
-                # So screen stays longer.
-                pygame.time.delay(3000)
+        # USER INPUT
+        for event in pygame.event.get():
+            # In case of quit
+            if event.type == pygame.QUIT:
+                self.running = False
                 break
 
-        pygame.quit()
+            if not hasattr(event, 'key'):
+                continue
+            down = event.type == KEYDOWN
+            if event.key == K_ESCAPE:
+                self.running = False
+                break
 
-    def draw_round(self):
-        self.screen.fill(BLACK)
-        for instance in self.game.instances:
-            self.draw_instance(instance)
-        pygame.display.flip()
+        if self.running:
+            self.screen.fill(BLACK)
+            for instance in self.game.instances:
+                self.draw_instance(instance)
+            pygame.display.flip()
+        else:
+            pygame.quit()
+
 
     def draw_instance(self, instance):
         '''Draw a creature: two outer shells: perception, collision,

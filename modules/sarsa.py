@@ -7,10 +7,12 @@ class Sarsa:
     '''Learning algorithm, based on playing multiple games, by updating
     a utility function and getting an action policy.
     '''
-    def __init__(self, config, game, maps=defaultdict(int)):
+    def __init__(self, config, game, preprocess, recognizer, maps=defaultdict(int)):
         # By default return a score of 0 for unknown.
         self.config = config
         self.game = game
+        self.preprocess = preprocess
+        self.recognizer = recognizer
         self.maps = maps
         self.reward_maps = defaultdict(int)
         # Parameters determined empirically.
@@ -20,6 +22,34 @@ class Sarsa:
 
         self.fill_reward_maps()
 
+    def begin_episode(self):
+        self.state, self.action = self.get_state_and_action()
+
+    def step(self):
+        self.game.pray.set_direction(self.action)
+        # Execute the action a from state s, going to state s'.
+        self.game.play_round()
+
+        game_ended = self.game.game_ended()
+        if game_ended:
+            # This will determine the state to not be found in utilities
+            # and thus return 0 always, promoting only the reward (as it's a
+            # final step in game).
+            next_state = next_action = 0
+        else:
+            # Get next action after s -> s'.
+            next_state, next_action = self.get_state_and_action()
+        # Update utilities and update (s,a) <- (s', a').
+        self.update_utilities(self.state, self.action, next_state, next_action, game_ended)
+        self.state, self.action = next_state, next_action
+
+    def get_state_and_action(self):
+        # Filter states produced by preprocessor, so that it's recognized to be
+        # one from the kmeans produced stable states.
+        state = self.recognizer.get_stable_state(
+            self.preprocess.get_state(self.game.instances))
+        action = self.get_action(state, self.game.get_allowed_states())
+        return state, action
 
     def fill_reward_maps(self):
         '''Win -> 1, loose -> -1, else just 0.'''

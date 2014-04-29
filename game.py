@@ -146,7 +146,6 @@ if __name__ == '__main__':
     preprocess = Preprocess(config)
     game = Game(config, preprocess)
     kmeans = KMeans(config, game)
-    sarsa = Sarsa(config, game)
 
     #
     # Preprocess module.
@@ -170,33 +169,13 @@ if __name__ == '__main__':
     #
     # Sarsa learning ; play games and learn.
     #
-    # Learn games now, train and build Q.
-    game.restart_game()
+    sarsa = Sarsa(config, game, preprocess, recognizer)
     learning_games = config.getint('algo', 'learning_games')
-    # Filter states produced by preprocessor, so that it's recognized to be
-    # one from the kmeans produced stable states.
-    state = recognizer.get_stable_state(preprocess.get_state(game.instances))
-    action = sarsa.get_action(state, game.get_allowed_states())
     while learning_games > 0:
-        game.pray.set_direction(action)
-        # Execute the action a from state s, going to state s'.
-        game.play_round()
-
-        game_ended = game.game_ended()
-        if game_ended:
-            game.restart_game()
-            learning_games -= 1
-            # This will determine the state to not be found in utilities
-            # and thus return 0 always, promoting only the reward (as it's a
-            # final step in game).
-            next_state = next_action = 0
-        else:
-            next_state = recognizer.get_stable_state(preprocess.get_state(game.instances))
-            # Get next action and its reward for s -> s'.
-            next_action = sarsa.get_action(next_state, game.get_allowed_states())
-        # Update utilities and update (s,a) <- (s', a').
-        sarsa.update_utilities(state, action, next_state, next_action, game_ended)
-        state, action = next_state, next_action
-
-    # Play with gui
-    #Draw(game)
+        gui = Draw(game)
+        game.restart_game()
+        sarsa.begin_episode()
+        while not game.game_ended():
+            sarsa.step()
+            gui.draw()
+        learning_games -= 1
