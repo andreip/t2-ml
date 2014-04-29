@@ -146,22 +146,6 @@ class Pray(BaseObject):
     def get_type_letter(self):
         return 'P'
 
-    def move(self):
-        '''Pray should avoid colliding with traps if it sees them.'''
-        for instance in self.game.instances:
-            if isinstance(instance, Trap):
-                # In case the pray sees a trap, try and avoid it.
-                if BaseObject.object_sees_object(self, instance):
-                    distance = Helper.euclidian_distance(self.coord, instance.coord)
-                    future_point = Helper.get_final_position(self.coord,
-                        self.direction, distance)
-                    if Helper.objects_collide(future_point,
-                                              self.collision_radius,
-                                              instance.coord,
-                                              instance.collision_radius):
-                        self.set_new_direction()
-        super(Pray, self).move()
-
 class Predator(BaseObject):
     @property
     def collision_radius(self):
