@@ -164,7 +164,7 @@ if __name__ == '__main__':
 
     # Instantiate the recognizer based on the cluster_states resulted from
     # kmeans.
-    recognizer = Recognizer(config, cluster_states)
+    recognizer = Recognizer(config, cluster_states, kmeans)
 
     learning_games = config.getint('algo', 'learning_games')
     print 'Learning for ' + str(learning_games) + ' games...',
