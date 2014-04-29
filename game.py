@@ -9,6 +9,7 @@ from objects import BaseObject, Pray, Predator, Trap
 from modules.kmeans import KMeans
 from modules.preprocess import Preprocess
 from modules.sarsa import Sarsa
+from modules.recognizer import Recognizer
 
 
 class Game:
@@ -156,15 +157,25 @@ if __name__ == '__main__':
         game.restart_game()
     print 'Have ' + str(len(preprocess.states)) + ' states after preprocess.'
 
-    # Reduce the number of states.
+    #
+    # KMeans module, reduce the number of states.
+    #
     cluster_states = kmeans.kmeans(preprocess.states)
     print 'Have ' + str(len(cluster_states)) + ' states after kmeans.'
 
+    # Instantiate the recognizer based on the cluster_states resulted from
+    # kmeans.
+    recognizer = Recognizer(config, cluster_states)
+
+    #
+    # Sarsa learning ; play games and learn.
+    #
     # Learn games now, train and build Q.
     game.restart_game()
     learning_games = config.getint('algo', 'learning_games')
-    state = preprocess.get_state(game.instances)
-    # TODO add a filter to states so it returns a state from those from kmeans
+    # Filter states produced by preprocessor, so that it's recognized to be
+    # one from the kmeans produced stable states.
+    state = recognizer.get_stable_state(preprocess.get_state(game.instances))
     action = sarsa.get_action(state, game.get_allowed_states())
     while learning_games > 0:
         game.pray.set_direction(action)
@@ -180,7 +191,7 @@ if __name__ == '__main__':
             # final step in game).
             next_state = next_action = 0
         else:
-            next_state = preprocess.get_state(game.instances)
+            next_state = recognizer.get_stable_state(preprocess.get_state(game.instances))
             # Get next action and its reward for s -> s'.
             next_action = sarsa.get_action(next_state, game.get_allowed_states())
         # Update utilities and update (s,a) <- (s', a').

@@ -34,7 +34,8 @@ class KMeans:
         centroids_count = self.get_centroids_count(clusters)
         print 'Centroids stats: ' + str(centroids_count)
 
-        non_empty_centroids = map(lambda k: centroids[k], centroids_count.keys())
+        non_empty_centroids = tuple(map(lambda k: tuple(centroids[k]),
+                                        centroids_count.keys()))
         return non_empty_centroids
 
     def kmeans_centroids(self, clusters):
