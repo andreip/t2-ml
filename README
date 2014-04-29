@@ -1,0 +1,89 @@
+# Petre Andrei, 342 C3
+
+== General ==
+
+Fisierul de configurare config.rc este utilizat pentru mai tot ce tine de joc sau de
+alegeri din algoritmi sau din module.
+
+Module si cum am implementat:
+* toate se gasesc in directorul modules/
+* preprocesarea consta in extagerea pozitiilor (coordonate) relative a pradatorilor si a
+  capcanelor si stocarea lor sub forma de lista [(a,b),(c,d),(e,f),...].
+* clasificarea lor apoi se face cu kmeans
+  - am considerat infinita distanta pentru ceea ce nu vad sau ceea ce a fost anihilat
+  - intre doua stari, incerc sa obtin distanta minima posibila si fac legatura acelor
+    coordonate care au combinatia distantei minime
+* modulul de recunoastere foloseste ceea ce am folosit si la kmeans, gasirea combinatiei minime
+  a distantei intre doua stari (care e reprezentat printr-un vector de coordonate)
+  - e tratat tot timpul cazul de a lua separat capcanele de pradatori, nu sunt tratate
+    in acelasi timp pe ambele analiza distantelor intre stari
+* modulul de learning: am folosit algoritmul SARSA cu politica Eps-greedy, si are de ales
+  initial mai mult random dintre cele 360 de posibilitati (grade) ale directiei de deplasare
+  pentru o pozitie data (o stare codificata ca mai sus).
+
+== Fisiere ==
+
+* tests/
+  - unit tests pentru dezvoltarea initiala cu kmeans care a fost mai plina de bug-uri
+* gui.py
+  - am folosit pygame pentru interfata, ei i se da controlul prin metoda draw()
+    care deseneaza o data si iese (desenreaza instantele la care tine referinte, ale caror
+    pozitii sunt modificate in programul principal)
+* game.py
+  - clasa Game contine logica de progres a jocului, construind coordonate random initiale
+    la fiecare joc (fara coliziuni) pentru toate instantele
+  - tine toate instantele in memorie
+  - stie cand jocul se termina si poate rezolva coliziunile aparute in joc prin stergerea
+    unor entitati => stergerea are efecte si asupra interfetei (care foloseste aceeasi lista din
+    care sunt sterse entitatile)
+* helper.py
+  - functii de calcul mai mult, gen dist euclidiana
+* objects.py
+  - mostenirea de obiecte
+    BaseObject
+    |
+    |---Pray 
+    |---Predator
+    |---Trap
+  - toate mostenesc capacitati comune, cu mici distinctii de date din fisierul de configurare
+  - au:
+    * directie
+    * viteza
+    * coordonate
+  - aflare directie noua prin
+    x += speed * cos(radians(directie))
+    y += speed * sin(radians(directie))
+
+== Rezultate obtinute ==
+
+Am rulat 10 batch-uri de cate 100 de teste pentru diferite configurari, mai jos.
+
+La final rulez cu interfata din care se observa:
+- evita capcane
+- castiga impotriva atacatorilor
+- [BONUS] atacatorii se sincronizeazaza asupra prazii atunci cand amandoi o vad
+
+(pt config actual)
+
+Won 93/100 total games.
+Won 89/100 total games.
+Won 87/100 total games.
+Won 88/100 total games.
+Won 91/100 total games.
+Won 82/100 total games.
+Won 87/100 total games.
+Won 83/100 total games.
+Won 91/100 total games.
+Won 95/100 total games.
+
+(pt condif actuala dar cu 30 de capcane - foarte incarcata harta)
+
+Won 43/100 total games.
+Won 45/100 total games.
+Won 43/100 total games.
+Won 44/100 total games.
+Won 50/100 total games.
+Won 42/100 total games.
+Won 43/100 total games.
+Won 51/100 total games.
+Won 42/100 total games.
