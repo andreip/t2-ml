@@ -19,7 +19,10 @@ verbose=0
 k=16
 preprocess_games=10
 learning_games=10
-playing_games=10
+batch_size=100
+batch_runs=10
+gui_games=10
+
 learning_alpha=0.1
 learning_eps=0.1
 learning_gamma=0.8

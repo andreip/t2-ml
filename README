@@ -25,6 +25,8 @@ Module si cum am implementat:
 
 * tests/
   - unit tests pentru dezvoltarea initiala cu kmeans care a fost mai plina de bug-uri
+* modules/
+  - toate cele patru module, explicate mai sus
 * gui.py
   - am folosit pygame pentru interfata, ei i se da controlul prin metoda draw()
     care deseneaza o data si iese (desenreaza instantele la care tine referinte, ale caror
