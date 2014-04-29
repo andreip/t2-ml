@@ -1,16 +1,16 @@
 # game given constants
 [game]
-x=700
-y=700
-pray_speed=5
-pray_perception=35
-pray_collision=15
+x=300
+y=300
+pray_speed=2
+pray_perception=40
+pray_collision=10
 pred_nr=3
-pred_speed=5
-pred_perception=30
-pred_collision=15
+pred_speed=3
+pred_perception=45
+pred_collision=10
 trap_nr=3
-trap_collision=30
+trap_collision=15
 
 verbose=0
 
